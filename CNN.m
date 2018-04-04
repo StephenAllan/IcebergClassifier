@@ -1,3 +1,10 @@
+% CSCI-431: Introduction to Computer Vision
+% Project - Iceberg Classifier
+%
+% @author Stephen Allan <swa9846>
+% @author Douglas Lee <dxl7697>
+
+
 %bring shit in
 %{
 fname = 'train.json';

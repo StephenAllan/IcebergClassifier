@@ -9,13 +9,19 @@ function writeAsImage(id, image, isIceberg)
     % WRITEASIMAGE TODO: Summary
     %   TODO: Description
 
-    destFolder = strcat(pwd, 'data\images\ship');
+    imagesFolder = 'data\images\';
+    if ~exist(imagesFolder, 'dir')
+        mkdir(imagesFolder);
+    end
+    
     if(isIceberg)
-        destFolder = strcat(pwd, 'data\images\iceberg');
+        destFolder = strcat(imagesFolder, 'iceberg');
+    else
+        destFolder = strcat(imagesFolder, 'ship');
     end
 
     if ~exist(destFolder, 'dir')
-      mkdir(destFolder);
+        mkdir(destFolder);
     end
     
     % force binary image
