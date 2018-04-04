@@ -20,7 +20,7 @@ function result = IcebergClassifier(jsonFilepath)
     
     data = jsondecode(rawData);
     
-    testData = data(6);
+    testData = data(3);
     
     %% Visualize Data
     visualizeData(testData);
@@ -28,6 +28,9 @@ function result = IcebergClassifier(jsonFilepath)
     %% Crop Object out of Image
     subImages = detectObject(testData);
     figure; imshowpair(subImages{1}, subImages{2}, 'montage');
+
+    %% Check if at center of image
+%     subImages = detectObject(data(3));
 
     
     result = data;
@@ -50,7 +53,8 @@ function subImages = detectObject(data)
     %   TODO: Description
     
     % FIXME: Some images are too bright and this threshold doesn't work.
-    brightnessThreshold = 140;
+    brightnessThreshold = 150;
+    middle = 75 / 2;
     
     bands = {data.band_1, data.band_2};
     subImages = {length(bands)};
@@ -63,18 +67,21 @@ function subImages = detectObject(data)
 
         imageStats = regionprops(binaryImage, 'BoundingBox', 'Area');
         for j = 1:length(imageStats)
-            % Check that the region is big enough to be an object
-            if imageStats(j).Area > 15
+            % Check that the region is the correct size of an object
+            if imageStats(j).Area > 15 && imageStats(j).Area < 100
                 box = imageStats(j).BoundingBox;  % box = [y, x, width, height]
-                rectangle('Position', [box(1), box(2), box(3), box(4)], 'EdgeColor', [1, 0, 0], 'LineWidth', 1);
-                
+
                 % Get a sub-image of just the individual object
                 cols = box(1) + 1:box(1) + box(3);
                 rows = box(2) + 1:box(2) + box(4);
-                subImages{i} = binaryImage(round(rows) - 1, round(cols) - 1);
                 
-                % One object per image
-                break;
+                if ismember(middle, rows) && ismember(middle, cols)
+                    rectangle('Position', [box(1), box(2), box(3), box(4)], 'EdgeColor', [1, 0, 0], 'LineWidth', 1);
+                    subImages{i} = binaryImage(round(rows) - 1, round(cols) - 1);
+                
+                    % One object per image
+                    break;
+                end
             end
         end
     end
