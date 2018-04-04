@@ -1,14 +1,14 @@
-FILENAME = 'train.json';
+jsonFilepath = 'data/train.json';
 
-fid = fopen(FILENAME);
-raw = fread(fid,inf);
-str = char(raw');
-fclose(fid);
-val = jsondecode(str);
+fileID = fopen(jsonFilepath, 'r');
+rawData = fread(fileID, '*char');
+fclose(fileID);
 
-for n = 1:length(val)
-    image = bandToImage(val(n).band_1);
-    writeAsImage(val(n).id, (image), val(n).is_iceberg);
+data = jsondecode(rawData);
+
+for n = 1:length(data)
+    image = bandToImage(data(n).band_1);
+    writeAsImage(data(n).id, (image), data(n).is_iceberg);
 end
 
 fprintf('finished separating images from iceberg and ships\n');
