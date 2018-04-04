@@ -25,10 +25,10 @@ function writeAsImage(id, image, isIceberg)
     end
     
     % force binary image
-    image=image - min(image(:));
-    image=image  /max(image(:));
+    image = image - min(image(:));
+    image = image / max(image(:));
     
-    % png, jpg will throw error
+    % png. jpg will throw error
     outputBaseName = [id, '.png'];
     fullDestinationFileName = fullfile(destFolder, outputBaseName);
 

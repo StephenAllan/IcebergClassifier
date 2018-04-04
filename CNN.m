@@ -5,17 +5,18 @@
 % @author Douglas Lee <dxl7697>
 
 
-%bring shit in
+% bring shit in
 %{
-fname = 'train.json';
-fid = fopen(fname);
-raw = fread(fid,inf);
-str = char(raw');
-fclose(fid);
-val = jsondecode(str);
+jsonFilepath = 'data/train.json';
+
+fileID = fopen(jsonFilepath, 'r');
+rawData = fread(fileID, '*char');
+fclose(fileID);
+
+val = jsondecode(rawData);
 %}
 
-%just print everything
+% just print everything
 %{
 for n = 1:length(val)
 fprintf('id: %s\n angle: %d\n avg band1: %d\n avg band2: %d\n is_iceberg: %d\n', ...
@@ -23,12 +24,12 @@ val(n).id,val(n).inc_angle, mean(val(n).band_1), mean(val(n).band_2), val(n).is_
 end
 %}
 
-%put the files into an image datastore with labels ship or iceberg
-imds = imageDatastore(strcat(pwd,'\images'),...
-    'IncludeSubfolders',true,...
-    'LabelSource','foldernames');
+% put the files into an image datastore with labels ship or iceberg
+imds = imageDatastore('data\images', ...
+    'IncludeSubfolders', true, ...
+    'LabelSource', 'foldernames');
 
-%select some random images and show them
+% select some random images and show them
 %{
 numImages = 1400;
 perm = randperm(numImages,20);
@@ -37,37 +38,34 @@ for i = 1:20
     imshow(imds.Files{perm(i)});
 end
 %}
-%{
-tested with:
-200
-%}
+
 numTrainingFiles = 600;
-[imdsTrain,imdsTest] = splitEachLabel(imds,numTrainingFiles,'randomize');
+[imdsTrain, imdsTest] = splitEachLabel(imds, numTrainingFiles, 'randomize');
       
 layers = [
     imageInputLayer([75 75 1])
     
-    convolution2dLayer(3,8,'Padding','same')
+    convolution2dLayer(3, 8, 'Padding', 'same')
     batchNormalizationLayer
     reluLayer   
     
-    maxPooling2dLayer(2,'Stride',2)
+    maxPooling2dLayer(2, 'Stride', 2)
     
-    convolution2dLayer(3,16,'Padding','same')
+    convolution2dLayer(3, 16, 'Padding', 'same')
     batchNormalizationLayer
     reluLayer   
     
-    maxPooling2dLayer(2,'Stride',2)
+    maxPooling2dLayer(2, 'Stride', 2)
     
-    convolution2dLayer(3,32,'Padding','same')
+    convolution2dLayer(3, 32, 'Padding', 'same')
     batchNormalizationLayer
     reluLayer   
-    
     
     fullyConnectedLayer(2)
     softmaxLayer
     classificationLayer];
-%this layer doesnt get anything good
+
+% this layer doesnt get anything good
 %{
 layers = [imageInputLayer([75 75 1]);
           convolution2dLayer(5,16); %wtf do with this
@@ -77,8 +75,9 @@ layers = [imageInputLayer([75 75 1]);
           softmaxLayer();
           classificationLayer()];
     
-    %}
-%doesnt work well either 
+%}
+
+% doesnt work well either 
 %{
 options = trainingOptions('sgdm',...
     'LearnRateSchedule','piecewise',...
@@ -91,14 +90,16 @@ options = trainingOptions('sgdm',...
 
 %does its job. kinda
 options = trainingOptions('sgdm', ...
-    'MaxEpochs',200,...
-    'InitialLearnRate',1e-4, ...
-    'Verbose',0, ...
-    'Plots','training-progress');
-          
-net = trainNetwork(imdsTrain,layers,options);
+    'MaxEpochs', 200, ...
+    'InitialLearnRate', 1e-4, ...
+    'Verbose', 0, ...
+    'Plots', 'training-progress');
 
-YPred = classify(net,imdsTest);
+net = trainNetwork(imdsTrain, layers, options);
+
+YPred = classify(net, imdsTest);
 YTest = imdsTest.Labels;
 
-accuracy = sum(YPred == YTest)/numel(YTest)
+accuracy = sum(YPred == YTest) / numel(YTest);
+
+fprintf('Accuracy = %f\n', accuracy);
